@@ -32,8 +32,8 @@ const sleep = (timer) => {
         console.log(records)
         if(orderInfo) {
             console.log('latest bid price:', ticker.bid)
-            console.log('order price:', orderInfo.price)
-            console.log('diff:', ticker.bid - orderInfo.price)
+            console.log('order price     :', orderInfo.price)
+            console.log('diff            :', ticker.bid - orderInfo.price)
             if(ticker.bid - orderInfo.price > profitPrice) {
                 let order = null
                 if(production) {
@@ -43,7 +43,7 @@ const sleep = (timer) => {
                     order = 'fuga'
                 }
                 orderInfo = null
-                console.log('利確しました', order)
+                console.log('利確しました' + "\n", order)
                 // sendToSlack('利確しました')
             } else if (ticker.bid - orderInfo.price < -profitPrice) {
                 let order = null
@@ -54,7 +54,7 @@ const sleep = (timer) => {
                     order = 'fuga'
                 }
                 orderInfo = null
-                console.log('ロスカットしました', order)
+                console.log('ロスカットしました' + "\n", order)
                 // sendToSlack('ロスカットしました')
             }
         }
@@ -74,7 +74,7 @@ const sleep = (timer) => {
                     order: order,
                     price: ticker.ask
                 }
-                console.log('買い注文を実施しました', orderInfo)
+                console.log('買い注文を実施しました' + "\n", orderInfo)
                 // sendToSlack('買い注文を実施しました')
             }
         }

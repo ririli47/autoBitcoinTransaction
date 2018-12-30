@@ -26,7 +26,7 @@ const sleep = (timer) => {
     while (true) {
         const ticker = await bitflyer.fetchTicker ('FX_BTC_JPY')
         records.push(ticker.ask)
-        if(records.length > 3) {
+        if(records.length > 5) {
             records.shift()
         }
         console.log(records)
@@ -59,7 +59,10 @@ const sleep = (timer) => {
             }
         }
         else {
-            if(records[0] < records[1] && records[1] < records[2]) {
+            if( records[0] < records[1] &&
+                records[1] < records[2] && 
+                records[2] < records[3] && 
+                records[3] < records[4] ) {
                 let order = null
                 if(production) {
                     order = await bitflyer.createMarketBuyOrder ('FX_BTC_JPY', orderSize)

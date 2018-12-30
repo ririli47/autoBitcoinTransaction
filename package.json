@@ -11,5 +11,8 @@
   "devDependencies": {
     "ccxt": "^1.18.85",
     "request": "^2.88.0"
+  },
+  "dependencies": {
+    "axios": "^0.18.0"
   }
 }

@@ -1,13 +1,16 @@
 'use strict';
-const ccxt = require ('ccxt');
+const ccxt = require ('ccxt')
 const config = require ('./config')
 
-const interval = 3000
-const profitPrice = 100
+const production = true
+
+const interval = 30000
+const profitPrice = 500
 const orderSize = 0.01
 const records = []
 
 let orderInfo = null
+
 
 const sleep = (timer) => {
     return new Promise((resolve, reject) => {
@@ -32,30 +35,74 @@ const sleep = (timer) => {
             console.log('order price:', orderInfo.price)
             console.log('diff:', ticker.bid - orderInfo.price)
             if(ticker.bid - orderInfo.price > profitPrice) {
-                // const order = await bitflyer.createMarketSellOrder ('FX_BTC_JPY', orderSize)
-                const order = 'fuga'
-
+                let order = null
+                if(production) {
+                    order = await bitflyer.createMarketSellOrder ('FX_BTC_JPY', orderSize)
+                }
+                else {
+                    order = 'fuga'
+                }
                 orderInfo = null
                 console.log('利確しました', order)
+                // sendToSlack('利確しました')
             } else if (ticker.bid - orderInfo.price < -profitPrice) {
-                // const order = await bitflyer.createMarketSellOrder ('FX_BTC_JPY', orderSize)
-                const order = 'fuga'
-
+                let order = null
+                if(production) {
+                    order = await bitflyer.createMarketSellOrder ('FX_BTC_JPY', orderSize)
+                }
+                else {
+                    order = 'fuga'
+                }
                 orderInfo = null
                 console.log('ロスカットしました', order)
+                // sendToSlack('ロスカットしました')
             }
         }
         else {
             if(records[0] < records[1] && records[1] < records[2]) {
-                // const order = await bitflyer.createMarketBuyOrder ('FX_BTC_JPY', orderSize)
-                const order = 'hoge'
+                let order = null
+                if(production) {
+                    order = await bitflyer.createMarketBuyOrder ('FX_BTC_JPY', orderSize)
+                }
+                else {
+                    order = 'hoge'
+                }
                 orderInfo = {
                     order: order,
                     price: ticker.ask
                 }
                 console.log('買い注文を実施しました', orderInfo)
+                // sendToSlack('買い注文を実施しました')
             }
         }
         await sleep(interval)
     }
 }) ();
+
+function sendToSlack(message) {
+    const axiosBase = require('axios');
+
+    const axios = axiosBase.create({
+        baseURL: 'https://hooks.slack.com/services/',
+        timeout: 10000,
+        headers: ''
+    })
+
+    var data = {
+        "channel": "#bitcoin_transaction",
+        "username": "webhookbot",
+        "text": message,
+    }
+
+    axios.post('T5E58Q00N/BCQ459QGJ/zwHpxXy1sVwzSMIc5xNLcD9k', {
+        params: {
+            payload: data
+        }
+    })
+    .then(response => { 
+        console.log(response)
+    })
+    .catch(error => {
+        console.log(error.response)
+    });
+}

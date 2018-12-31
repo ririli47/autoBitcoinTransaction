@@ -5,7 +5,7 @@ const config = require ('./config')
 const production = false
 
 const interval = 30000
-const profitPrice = 500
+const profitPrice = 300
 const lossCutPrice = -250
 const orderSize = 0.01
 const records = []

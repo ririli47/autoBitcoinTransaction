@@ -2,10 +2,10 @@
 const ccxt = require ('ccxt')
 const config = require ('./config')
 
-const production = false
+const production = true
 
-const interval = 30000
-const profitPrice = 300
+const interval = 10000
+const profitPrice = 100
 const lossCutPrice = -250
 const orderSize = 0.01
 const records = []

@@ -35,37 +35,69 @@ const sleep = (timer) => {
             console.log('latest bid price:', ticker.bid)
             console.log('order price     :', orderInfo.price)
             console.log('diff            :', ticker.bid - orderInfo.price)
-            if(ticker.bid - orderInfo.price > profitPrice) {
-                let order = null
-                if(env.production) {
-                    order = await bitflyer.createMarketSellOrder ('FX_BTC_JPY', orderSize)
-                }
-                else {
-                    order = 'fuga'
-                }
+            if(orderInfo.position == 'buy') {
+                if(ticker.bid - orderInfo.price > profitPrice) {
+                    let order = null
+                    if(env.production) {
+                        order = await bitflyer.createMarketSellOrder ('FX_BTC_JPY', orderSize)
+                    }
+                    else {
+                        order = 'fuga'
+                    }
 
-                allSales = ticker.bid - orderInfo.price
-                console.log('利確しました' + "\n", order)
-                console.log('単収支報告：', ticker.ask - orderInfo.price)
-                console.log('総収支報告：', allSales)
+                    allSales += (ticker.bid - orderInfo.price)
+                    console.log('利確しました' + "\n", order)
+                    console.log('単収支報告：', ticker.ask - orderInfo.price)
+                    console.log('総収支報告：', allSales)
 
-                orderInfo = null
-                // sendToSlack('利確しました')
-            } else if (ticker.bid - orderInfo.price < lossCutPrice) {
-                let order = null
-                if(env.production) {
-                    order = await bitflyer.createMarketSellOrder ('FX_BTC_JPY', orderSize)
-                }
-                else {
-                    order = 'fuga'
-                }
-                allSales = ticker.bid - orderInfo.price
-                console.log('ロスカットしました' + "\n", order)
-                console.log('単収支報告：', ticker.ask - orderInfo.price)
-                console.log('総収支報告：', allSales)
+                    orderInfo = null
+                } else if (ticker.bid - orderInfo.price < lossCutPrice) {
+                    let order = null
+                    if(env.production) {
+                        order = await bitflyer.createMarketSellOrder ('FX_BTC_JPY', orderSize)
+                    }
+                    else {
+                        order = 'fuga'
+                    }
+                    allSales += (ticker.bid - orderInfo.price)
+                    console.log('ロスカットしました' + "\n", order)
+                    console.log('単収支報告：', ticker.ask - orderInfo.price)
+                    console.log('総収支報告：', allSales)
 
-                orderInfo = null
-                // sendToSlack('ロスカットしました')
+                    orderInfo = null
+                }
+            }
+            else if (orderInfo.position = 'sell') {
+                if(orderInfo.price - ticker.bid > profitPrice) {
+                    let order = null
+                    if(env.production) {
+                        order = await bitflyer.createMarketBuyOrder ('FX_BTC_JPY', orderSize)
+                    }
+                    else {
+                        order = 'fuga'
+                    }
+
+                    allSales += (ticker.bid - orderInfo.price)
+                    console.log('利確しました' + "\n", order)
+                    console.log('単収支報告：', ticker.ask - orderInfo.price)
+                    console.log('総収支報告：', allSales)
+
+                    orderInfo = null
+                } else if (orderInfo.price - ticker.bid < lossCutPrice) {
+                    let order = null
+                    if(env.production) {
+                        order = await bitflyer.createMarketBuyOrder ('FX_BTC_JPY', orderSize)
+                    }
+                    else {
+                        order = 'fuga'
+                    }
+                    allSales += (ticker.bid - orderInfo.price)
+                    console.log('ロスカットしました' + "\n", order)
+                    console.log('単収支報告：', ticker.ask - orderInfo.price)
+                    console.log('総収支報告：', allSales)
+
+                    orderInfo = null
+                }
             }
         }
         else {
@@ -81,40 +113,30 @@ const sleep = (timer) => {
                 }
                 orderInfo = {
                     order: order,
-                    price: ticker.ask
+                    price: ticker.ask,
+                    position: 'buy'
                 }
                 console.log('買い注文を実施しました' + "\n", orderInfo)
                 // sendToSlack('買い注文を実施しました')
+            }
+            else if(records[3] < records[2] &&
+                    records[2] < records[1] && 
+                    records[1] < records[0] ) {
+                let order = null
+                if(env.production) {
+                    order = await bitflyer.createMarketSellOrder ('FX_BTC_JPY', orderSize)
+                }
+                else {
+                    order = 'hoge'
+                }
+                orderInfo = {
+                    order: order,
+                    price: ticker.ask,
+                    position: 'sell'
+                }
+                console.log('売り注文を実施しました' + "\n", orderInfo)        
             }
         }
         await sleep(interval)
     }
 }) ();
-
-function sendToSlack(message) {
-    const axiosBase = require('axios');
-
-    const axios = axiosBase.create({
-        baseURL: 'https://hooks.slack.com/services/',
-        timeout: 10000,
-        headers: ''
-    })
-
-    var data = {
-        "channel": "#bitcoin_transaction",
-        "username": "webhookbot",
-        "text": message,
-    }
-
-    axios.post('T5E58Q00N/BCQ459QGJ/zwHpxXy1sVwzSMIc5xNLcD9k', {
-        params: {
-            payload: data
-        }
-    })
-    .then(response => { 
-        console.log(response)
-    })
-    .catch(error => {
-        console.log(error.response)
-    });
-}

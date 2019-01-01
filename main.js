@@ -2,7 +2,7 @@
 const ccxt = require ('ccxt')
 const config = require ('./config')
 
-const production = true
+const production = false
 
 const interval = 10000
 const profitPrice = 100
@@ -44,12 +44,13 @@ const sleep = (timer) => {
                 else {
                     order = 'fuga'
                 }
-                orderInfo = null
+
                 allSales = ticker.bid - orderInfo.price
                 console.log('利確しました' + "\n", order)
                 console.log('単収支報告：', ticker.ask - orderInfo.price)
                 console.log('総収支報告：', allSales)
 
+                orderInfo = null
                 // sendToSlack('利確しました')
             } else if (ticker.bid - orderInfo.price < lossCutPrice) {
                 let order = null
@@ -59,12 +60,12 @@ const sleep = (timer) => {
                 else {
                     order = 'fuga'
                 }
-                orderInfo = null
                 allSales = ticker.bid - orderInfo.price
                 console.log('ロスカットしました' + "\n", order)
                 console.log('単収支報告：', ticker.ask - orderInfo.price)
                 console.log('総収支報告：', allSales)
 
+                orderInfo = null
                 // sendToSlack('ロスカットしました')
             }
         }

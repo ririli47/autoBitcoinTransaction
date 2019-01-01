@@ -1,12 +1,11 @@
 'use strict';
 const ccxt = require ('ccxt')
 const config = require ('./config')
-
-const production = false
+const env = require ('./env')
 
 const interval = 10000
-const profitPrice = 100
-const lossCutPrice = -250
+const profitPrice = 500
+const lossCutPrice = -500
 const orderSize = 0.01
 const records = []
 
@@ -38,7 +37,7 @@ const sleep = (timer) => {
             console.log('diff            :', ticker.bid - orderInfo.price)
             if(ticker.bid - orderInfo.price > profitPrice) {
                 let order = null
-                if(production) {
+                if(env.production) {
                     order = await bitflyer.createMarketSellOrder ('FX_BTC_JPY', orderSize)
                 }
                 else {
@@ -54,7 +53,7 @@ const sleep = (timer) => {
                 // sendToSlack('利確しました')
             } else if (ticker.bid - orderInfo.price < lossCutPrice) {
                 let order = null
-                if(production) {
+                if(env.production) {
                     order = await bitflyer.createMarketSellOrder ('FX_BTC_JPY', orderSize)
                 }
                 else {
@@ -74,7 +73,7 @@ const sleep = (timer) => {
                 records[1] < records[2] && 
                 records[2] < records[3] ) {
                 let order = null
-                if(production) {
+                if(env.production) {
                     order = await bitflyer.createMarketBuyOrder ('FX_BTC_JPY', orderSize)
                 }
                 else {

@@ -11,6 +11,7 @@ const orderSize = 0.01
 const records = []
 
 let orderInfo = null
+let allSales = 0
 
 
 const sleep = (timer) => {
@@ -44,7 +45,11 @@ const sleep = (timer) => {
                     order = 'fuga'
                 }
                 orderInfo = null
+                allSales = ticker.bid - orderInfo.price
                 console.log('利確しました' + "\n", order)
+                console.log('単収支報告：', ticker.ask - orderInfo.price)
+                console.log('総収支報告：', allSales)
+
                 // sendToSlack('利確しました')
             } else if (ticker.bid - orderInfo.price < lossCutPrice) {
                 let order = null
@@ -55,7 +60,11 @@ const sleep = (timer) => {
                     order = 'fuga'
                 }
                 orderInfo = null
+                allSales = ticker.bid - orderInfo.price
                 console.log('ロスカットしました' + "\n", order)
+                console.log('単収支報告：', ticker.ask - orderInfo.price)
+                console.log('総収支報告：', allSales)
+
                 // sendToSlack('ロスカットしました')
             }
         }

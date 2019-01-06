@@ -26,7 +26,7 @@ const sleep = (timer) => {
 //Dateオブジェクト生成
 let date = new Date()
 //21分前にセット
-date.setMinutes(date.getMinutes() -21)
+date.setMinutes(date.getMinutes() -42)
 let after = Math.floor( date.getTime() / 1000 )
 console.log(after)
 
@@ -48,12 +48,30 @@ request(options)
     // console.log(result.result['60'])
 
     for(let i = result.result['60'].length-1;  i > 0;  i--) {
-        console.log(result.result['60'][i][0] + ' : '  + result.result['60'][i][4])
+        console.log(i + ' : ' + result.result['60'][i][0] + ' : '  + result.result['60'][i][4])
     }
+
+
+    //指数平滑移動平均計算開始
+    let exp = Array()
+    let exp_1 = 0
+
+    //1日目は完全に平均
+    for(let i = 0;  i < 21;  i++) {
+        exp_1 += result.result['60'][i][4]
+    }
+    exp.push(exp_1/21)
+    console.log(exp[0])
+
+    //2日目からは計算
+    //todo:
+    // for()
+
 })
 .catch(function(err) {
     console.log(err)
 })
+
 
 
 

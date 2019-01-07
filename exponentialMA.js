@@ -25,7 +25,7 @@ const sleep = (timer) => {
 
 //Dateオブジェクト生成
 let date = new Date()
-//21分前にセット
+//42分前にセット
 date.setMinutes(date.getMinutes() -42)
 let after = Math.floor( date.getTime() / 1000 )
 console.log(after)
@@ -57,6 +57,7 @@ request(options)
     let exp_1 = 0
 
     //1日目は完全に平均
+    //0~20までで初日の平均を出す
     for(let i = 0;  i < 21;  i++) {
         exp_1 += result.result['60'][i][4]
     }
@@ -64,8 +65,13 @@ request(options)
     console.log(exp[0])
 
     //2日目からは計算
-    //todo:
-    // for()
+    //21~42で計算する
+    for(let i = 21;  i < 42;  i++) {
+        exp[i -20] = exp[i -21] + ((2 / (21 + 1)) * (result.result['60'][i][4] - exp[i -21]))
+        console.log(exp[i -20])
+    }
+
+    //現在の値
 
 })
 .catch(function(err) {

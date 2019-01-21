@@ -4,13 +4,9 @@ const env = require("./env");
 const request = require("request-promise");
 
 const interval = 60000;
-const profitPrice = 500;
-const lossCutPrice = -250;
 const orderSize = 0.01;
-const records = [];
-
-let orderInfo = null;
-let allSales = 0;
+const middleTerm = 10
+const shortTerm = 5
 
 const sleep = timer => {
   return new Promise((resolve, reject) => {
@@ -72,7 +68,7 @@ function CulcFirstDay(term) {
 	}
   let firstTermFlg = true;
   let yesterdayAverageMiddle = 0
-  let yesterdayAverageShort = 0
+	let yesterdayAverageShort = 0
   while (true) {
 		//現在の値
 		let date = new Date();
@@ -84,8 +80,8 @@ function CulcFirstDay(term) {
 		console.log("ask : " + ticker.ask)
 		
 		if (firstTermFlg) {
-			yesterdayAverageMiddle = await CulcFirstDay(21)
-			yesterdayAverageShort  = await CulcFirstDay(10)
+			yesterdayAverageMiddle = await CulcFirstDay(middleTerm)
+			yesterdayAverageShort  = await CulcFirstDay(shortTerm)
 			console.log('yesterdayAverageMiddle : ' + yesterdayAverageMiddle)
 			console.log('yesterdayAverageShort  : ' + yesterdayAverageShort )
 			firstTermFlg = false
@@ -113,11 +109,11 @@ function CulcFirstDay(term) {
 
 
 		//   exp[21] = exp[20] + (2 / (21 + 1)) * (ticker.ask - exp[20]);
-		const todayAverageMiddle = yesterdayAverageMiddle + (2 / (21 + 1)) * (ticker.ask - yesterdayAverageMiddle)
+		const todayAverageMiddle = yesterdayAverageMiddle + (2 / (middleTerm + 1)) * (ticker.ask - yesterdayAverageMiddle)
 		console.log('todayAverageMiddle : ' + todayAverageMiddle)
 		yesterdayAverageMiddle = todayAverageMiddle
 
-		const todayAverageShort = yesterdayAverageShort + (2 / (10 + 1)) * (ticker.ask - yesterdayAverageShort)
+		const todayAverageShort = yesterdayAverageShort + (2 / (shortTerm + 1)) * (ticker.ask - yesterdayAverageShort)
 		console.log('todayAverageShort : ' + todayAverageShort)
 		yesterdayAverageShort = todayAverageShort
 

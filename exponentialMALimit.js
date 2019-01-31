@@ -64,7 +64,8 @@ function CulcFirstDay(term) {
   let status = {
 		postion: null,
 		order: null,
-		price: 0
+		price: 0,
+		neutral = null
 	}
   let firstTermFlg = true;
   let yesterdayAverageMiddle = 0
@@ -78,7 +79,20 @@ function CulcFirstDay(term) {
 		const bitflyer = new ccxt.bitflyer(config)
 		const ticker = await bitflyer.fetchTicker("FX_BTC_JPY")
 		console.log("ask : " + ticker.ask)
+
+
+		status.neutral = false
+
+		let orders = await bitflyer.privateGetGetchildorders({'product_code':'FX_BTC_JPY', 'child_order_state':'ACTIVE'});
 		
+		if(orders.length != 0) {
+			console.log(result)
+			let result = await bitflyer.privatePostCancelallchildorders ({"product_code": "FX_BTC_JPY"});
+			console.log(result)
+
+			status.neutral = true
+		}
+
 		if (firstTermFlg) {
 			yesterdayAverageMiddle = await CulcFirstDay(middleTerm)
 			yesterdayAverageShort  = await CulcFirstDay(shortTerm)
@@ -107,8 +121,6 @@ function CulcFirstDay(term) {
 			console.log(status)
 		}
 
-		let result = await bitflyer.privatePostCancelallchildorders ({"product_code": "FX_BTC_JPY"});
-		console.log(result)
 
 		const todayAverageMiddle = yesterdayAverageMiddle + (2 / (middleTerm + 1)) * (ticker.ask - yesterdayAverageMiddle)
 		console.log('todayAverageMiddle : ' + todayAverageMiddle)
@@ -120,45 +132,53 @@ function CulcFirstDay(term) {
 
 
 		if(todayAverageMiddle < todayAverageShort) {
-			if(status.price) {
-				console.log('評価額 : ', status.price - ticker.ask)
-			}
-			console.log('ゴールデンクロス！')
-			//ポジション解消分
-			if (env.production) {
-				status.order = await bitflyer.createLimitBuyOrder("FX_BTC_JPY",　orderSize, ticker.ask - 100);
-			} else {
-				status.order = "hoge";
-			}
-			status.postion = 'buy'
-			status.price = ticker.ask
-			console.log(status)
-			//新規ポジション分
-			if (env.production) {
-				status.order = await bitflyer.createLimitBuyOrder("FX_BTC_JPY",　orderSize, ticker.ask - 100);
-			} else {
-				status.order = "hoge";
+			if(status.postion == 'sell') {
+				if(status.price) {
+					console.log('評価額 : ', status.price - ticker.ask)
+				}
+				console.log('ゴールデンクロス！')
+				//ポジション解消分
+				if(status.neutral) {
+					if (env.production) {
+						status.order = await bitflyer.createLimitBuyOrder("FX_BTC_JPY",　orderSize, ticker.ask - 100);
+					} else {
+						status.order = "hoge";
+					}	
+				}
+				status.postion = 'buy'
+				status.price = ticker.ask
+				console.log(status)
+				//新規ポジション分
+				if (env.production) {
+					status.order = await bitflyer.createLimitBuyOrder("FX_BTC_JPY",　orderSize, ticker.ask - 100);
+				} else {
+					status.order = "hoge";
+				}
 			}
 		}
 		else if(todayAverageMiddle > todayAverageShort) {
-			if(status.price) {
-				console.log('評価額 : ', ticker.ask - status.price )
-			}
-			console.log('デッドクロス！')
-			//ポジション解消分
-			if (env.production) {
-				status.order = await bitflyer.createLimitSellOrder("FX_BTC_JPY", orderSize, ticker.ask + 100);
-			} else {
-				status.order = "hoge";
-			}
-			status.postion = 'sell'
-			status.price = ticker.ask
-			console.log(status)
-			//新規ポジション分
-			if (env.production) {
-				status.order = await bitflyer.createLimitSellOrder("FX_BTC_JPY", orderSize, ticker.ask + 100);
-			} else {
-				status.order = "hoge";
+			if(status.postion == 'buy') {
+				if(status.price) {
+					console.log('評価額 : ', ticker.ask - status.price )
+				}
+				console.log('デッドクロス！')
+				//ポジション解消分
+				if(status.neutral) {
+					if (env.production) {
+						status.order = await bitflyer.createLimitSellOrder("FX_BTC_JPY", orderSize, ticker.ask + 100);
+					} else {
+						status.order = "hoge";
+					}
+				}
+				status.postion = 'sell'
+				status.price = ticker.ask
+				console.log(status)
+				//新規ポジション分
+				if (env.production) {
+					status.order = await bitflyer.createLimitSellOrder("FX_BTC_JPY", orderSize, ticker.ask + 100);
+				} else {
+					status.order = "hoge";
+				}
 			}
 		}
 		await sleep(interval)

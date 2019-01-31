@@ -65,7 +65,7 @@ function CulcFirstDay(term) {
 		postion: null,
 		order: null,
 		price: 0,
-		neutral = null
+		neutral: null
 	}
   let firstTermFlg = true;
   let yesterdayAverageMiddle = 0

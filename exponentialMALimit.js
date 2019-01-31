@@ -86,7 +86,7 @@ function CulcFirstDay(term) {
 		let orders = await bitflyer.privateGetGetchildorders({'product_code':'FX_BTC_JPY', 'child_order_state':'ACTIVE'});
 		
 		if(orders.length != 0) {
-			console.log(result)
+			console.log(orders)
 			let result = await bitflyer.privatePostCancelallchildorders ({"product_code": "FX_BTC_JPY"});
 			console.log(result)
 

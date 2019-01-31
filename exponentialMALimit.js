@@ -91,6 +91,12 @@ function CulcFirstDay(term) {
 			console.log(result)
 
 			status.neutral = true
+			if(status.postion == 'buy') {
+				status.postion = 'sell'
+			}
+			else {
+				status.postion = 'buy'
+			}
 		}
 
 		if (firstTermFlg) {

@@ -138,7 +138,7 @@ function CulcFirstDay(term) {
 				}
 				console.log('ゴールデンクロス！')
 				//ポジション解消分
-				if(status.neutral) {
+				if(!status.neutral) {
 					if (env.production) {
 						status.order = await bitflyer.createLimitBuyOrder("FX_BTC_JPY",　orderSize, ticker.ask - 100);
 					} else {
@@ -163,7 +163,7 @@ function CulcFirstDay(term) {
 				}
 				console.log('デッドクロス！')
 				//ポジション解消分
-				if(status.neutral) {
+				if(!status.neutral) {
 					if (env.production) {
 						status.order = await bitflyer.createLimitSellOrder("FX_BTC_JPY", orderSize, ticker.ask + 100);
 					} else {

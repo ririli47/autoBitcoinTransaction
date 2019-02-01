@@ -86,8 +86,7 @@ function CulcFirstDay(term) {
 
 		//ポジションがあったらステータスを変更
 		if(resultPositions.length != 0) {
-			let resultPosition = JSON.parse(resultPositions)
-			position = resultPosition.side
+			position = resultPositions[0]['side']
 		}
 		else {
 			position = 'SQUARE'

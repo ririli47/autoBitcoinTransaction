@@ -77,6 +77,8 @@ function CulcFirstDay(term) {
 	let firstTermFlg = true
 	let position = 'SQUARE'
 	let order = null
+	let order1 = null
+	let order2 = null
 
     while (true) {
 		//現在時刻

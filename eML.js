@@ -1,12 +1,17 @@
-'use strict';
+'use strict'
 const ccxt = require ('ccxt')
+const request = require("request-promise")
 const config = require ('./config')
 const env = require ('./env')
 
-const interval = 5000
-const orderSize = 0.01;
+
+const interval = 60000
+const orderSize = 0.01
 const middleTerm = 10
 const shortTerm = 5
+
+let beforeAverageMiddle = 0
+let beforeAverageShort = 0
 
 
 const sleep = (timer) => {
@@ -23,12 +28,12 @@ function CulcFirstDay(term) {
 
 	/* 1分目の平均値を計算 */
 	//Dateオブジェクト生成
-	let date = new Date();
-	//   console.log(Math.floor(date.getTime() / 1000));
+	let date = new Date()
+	//   console.log(Math.floor(date.getTime() / 1000))
 	//仮に30分前にセット
-	date.setMinutes(date.getMinutes() - 30);
-	let after = Math.floor(date.getTime() / 1000);
-	//   console.log(after);
+	date.setMinutes(date.getMinutes() - 30)
+	let after = Math.floor(date.getTime() / 1000)
+	//   console.log(after)
 
 	// APIアクセス afterから60秒ごとのデータを取得
 	const options = {
@@ -38,27 +43,27 @@ function CulcFirstDay(term) {
 		periods: 60,
 		after: after
 		}
-	};
+	}
 
 	request(options)
 		.then(function(body) {
-			let result = JSON.parse(body);
+			let result = JSON.parse(body)
 			//単純平均を計算
 			let average = 0
 			console.log(term)
 			for (let i = result.result["60"].length - 1; i >= result.result["60"].length - term; i-- ) {
-				average += result.result["60"][i][4];
+				average += result.result["60"][i][4]
 				console.log(
 					i + " : " + result.result["60"][i][0] + " : " + result.result["60"][i][4]
-				);
+				)
 			}
 			average = average / term
-			resolve(average);
+			resolve(average)
 		})
 		.catch(function(err) {
 			console.log(err)
 			reject(err)
-		});
+		})
 	})
 }
 
@@ -66,36 +71,104 @@ function CulcFirstDay(term) {
 (async function () {
     const bitflyer = new ccxt.bitflyer (config)
 
+	let firstTermFlg = true
+	let position = 'SQUARE'
+	let order = null
+
     while (true) {
 		//現在時刻
-		let date = new Date();
+		let date = new Date()
 		console.log("\n" + "time: " + date)
 
-        //現在のポジション一覧を取得
+        /* 現在のポジション一覧を取得 */
+		let resultPositions = await bitflyer.privateGetGetpositions({'product_code':'FX_BTC_JPY'})
+		console.log('Position list : ', resultPositions)
 
-        //現在の注文状況を取得
+		//ポジションがあったらステータスを変更
+		if(resultPositions.length != 0) {
+			let resultPosition = JSON.parse(resultPositions)
+			position = resultPosition.side
+		}
+		else {
+			position = 'SQUARE'
+		}
+		console.log('Now Position : ', position)
 
-        //初回起動時のみ前日の指数平滑移動平均を求める
+        /* 現在の注文状況を取得 */
+		let resultOrders = await bitflyer.privateGetGetchildorders({'product_code':'FX_BTC_JPY', 'child_order_state':'ACTIVE'})
+		console.log('Order list : ', resultOrders)
 
-        //現時点の指数平滑移動平均を求める
+		//必要であればキャンセル
+		if(resultOrders.length != 0) {
+			let result = await bitflyer.privatePostCancelallchildorders ({"product_code": "FX_BTC_JPY"})
+		}
 
-        //ニュートラルの場合
+        /* 初回起動時のみ前日の指数平滑移動平均を求める */
+		if (firstTermFlg) {
+			beforeAverageMiddle = await CulcFirstDay(middleTerm)
+			beforeAverageShort  = await CulcFirstDay(shortTerm)
+			console.log('beforeAverageMiddle : ' + beforeAverageMiddle)
+			console.log('beforeAverageShort  : ' + beforeAverageShort )
+			firstTermFlg = false
+		}
 
-        //売りポジションの場合
-
-        //買いポジションの場合
-
-
-
-
+		/* 現時点の指数平滑移動平均を求める */
         const ticker = await bitflyer.fetchTicker("FX_BTC_JPY")
 		console.log("ask : " + ticker.ask)
 
-		// let result = await bitflyer.privateGetGetchildorders({'product_code':'FX_BTC_JPY', 'child_order_state':'ACTIVE'});
-		let result = await bitflyer.privateGetGetpositions({'product_code':'FX_BTC_JPY'});
+		//中期指数平滑移動平均
+		const nowAverageMiddle = beforeAverageMiddle + (2 / (middleTerm + 1)) * (ticker.ask - beforeAverageMiddle)
+		console.log('nowAverageMiddle : ' + nowAverageMiddle)
+		beforeAverageMiddle = nowAverageMiddle
 
+		//短期指数平滑移動平均
+		const nowAverageShort = beforeAverageShort + (2 / (shortTerm + 1)) * (ticker.ask - beforeAverageShort)
+		console.log('nowAverageShort  : ' + nowAverageShort)
+		beforeAverageShort = nowAverageShort
 
-        console.log(result)
+		/* 注文実施 */
+		if(position == 'SQUARE') {
+		    //ニュートラルの場合
+			if(nowAverageMiddle < nowAverageShort) {
+				if (env.production) {
+					order = await bitflyer.createLimitBuyOrder("FX_BTC_JPY",　orderSize, ticker.ask - 100);
+				} else {
+					order = "hoge";
+				}
+			}
+			else {
+				if (env.production) {
+					order = await bitflyer.createLimitSellOrder("FX_BTC_JPY", orderSize, ticker.ask + 100);
+				} else {
+					order = "hoge";
+				}
+			}
+			console.log('Square order : ', order)
+		}
+		else if(postion == 'SELL') {
+			//売りポジションの場合
+			if(todayAverageMiddle < todayAverageShort) {
+				//ゴールデンクロス
+				if (env.production) {
+					order = await bitflyer.createLimitBuyOrder("FX_BTC_JPY",　orderSize*2, ticker.ask - 100);
+				} else {
+					order = "hoge";
+				}
+				console.log('Long positioning order : ', order)
+			}
+		}
+		else if(postion == 'BUY') {
+        	//買いポジションの場合
+			if(todayAverageShort < todayAverageMiddle) {
+				//ゴールデンクロス
+				if (env.production) {
+					order = await bitflyer.createLimitSellOrder("FX_BTC_JPY",　orderSize*2, ticker.ask + 100);
+				} else {
+					order = "hoge";
+				}
+				console.log('Short positioning order : ', order)
+			}
+		}
         await sleep(interval)
     }
-}) ();
+}) ()

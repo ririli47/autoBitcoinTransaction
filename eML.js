@@ -146,7 +146,7 @@ function CulcFirstDay(term) {
 		}
 		else if(position == 'SELL') {
 			//売りポジションの場合
-			if(todayAverageMiddle < todayAverageShort) {
+			if(nowAverageMiddle < nowAverageShort) {
 				//ゴールデンクロス
 				if (env.production) {
 					order = await bitflyer.createLimitBuyOrder("FX_BTC_JPY",　orderSize*2, ticker.ask - 100);
@@ -158,7 +158,7 @@ function CulcFirstDay(term) {
 		}
 		else if(position == 'BUY') {
         	//買いポジションの場合
-			if(todayAverageShort < todayAverageMiddle) {
+			if(nowAverageShort < nowAverageMiddle) {
 				//ゴールデンクロス
 				if (env.production) {
 					order = await bitflyer.createLimitSellOrder("FX_BTC_JPY",　orderSize*2, ticker.ask + 100);

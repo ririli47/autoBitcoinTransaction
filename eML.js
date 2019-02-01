@@ -144,7 +144,7 @@ function CulcFirstDay(term) {
 			}
 			console.log('Square order : ', order)
 		}
-		else if(postion == 'SELL') {
+		else if(position == 'SELL') {
 			//売りポジションの場合
 			if(todayAverageMiddle < todayAverageShort) {
 				//ゴールデンクロス
@@ -156,7 +156,7 @@ function CulcFirstDay(term) {
 				console.log('Long positioning order : ', order)
 			}
 		}
-		else if(postion == 'BUY') {
+		else if(position == 'BUY') {
         	//買いポジションの場合
 			if(todayAverageShort < todayAverageMiddle) {
 				//ゴールデンクロス

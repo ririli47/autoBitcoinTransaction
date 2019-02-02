@@ -106,9 +106,7 @@ function CulcFirstDay(term) {
         if(resultOrders.length != 0) {
             position = resultPositions[0]['side']   
         }
-        else {
-			position = 'SQUARE'
-		}
+		console.log('Now Position : ', position)
 
 		//必要であればキャンセル
 		if(resultOrders.length != 0) {

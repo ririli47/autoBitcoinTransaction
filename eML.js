@@ -104,7 +104,7 @@ function CulcFirstDay(term) {
         
         //オーダーがあったらステータスを変更
         if(resultOrders.length != 0) {
-            position = resultPositions[0]['side']   
+            position = resultOrders[0]['side']   
         }
 		console.log('Now Position : ', position)
 

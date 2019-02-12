@@ -154,7 +154,7 @@ function CulcFirstDay(term) {
 			console.log('Square order : ', order)
 		}
 		else if(position == 'SELL') {
-			if(pnl > 0) {
+			if(pnl.open_position_pnl > 0) {
 				//売りポジションの場合
 				if(nowAverageMiddle < nowAverageShort && beforeAverageMiddle > beforeAverageShort) {
 					//ゴールデンクロス
@@ -180,7 +180,7 @@ function CulcFirstDay(term) {
 			}
 		}
 		else if(position == 'BUY') {
-			if(pnl > 0) {
+			if(pnl.open_position_pnl > 0) {
 				//買いポジションの場合
 				if(nowAverageShort < nowAverageMiddle && beforeAverageShort > beforeAverageMiddle) {
 					//デッドクロス

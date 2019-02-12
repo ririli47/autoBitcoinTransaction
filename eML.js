@@ -168,7 +168,7 @@ function CulcFirstDay(term) {
 					console.log('Cancellation & Long positioning order : ', order)
 				}
 			}
-			else if(pnl < -100){
+			else if(pnl < -15){
 				if (env.production) {
 					//ポジション解消
 					//新規ポジション
@@ -194,7 +194,7 @@ function CulcFirstDay(term) {
 					console.log('Cancellation & Short positioning order : ', order)
 				}
 			}
-			else if(pnl < -100){
+			else if(pnl < -15){
 				if (env.production) {
 					//ポジション解消
 					//新規ポジション

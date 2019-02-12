@@ -77,8 +77,6 @@ function CulcFirstDay(term) {
 	let firstTermFlg = true
 	let position = 'SQUARE'
 	let order = null
-	let order1 = null
-	let order2 = null
 
     while (true) {
 		//現在時刻
@@ -118,31 +116,37 @@ function CulcFirstDay(term) {
 
 		/* 現時点の指数平滑移動平均を求める */
         const ticker = await bitflyer.fetchTicker("FX_BTC_JPY")
-		console.log("ask : " + ticker.ask)
+		console.log("last : " + ticker.last)
 
 		//中期指数平滑移動平均
-		const nowAverageMiddle = beforeAverageMiddle + (2 / (middleTerm + 1)) * (ticker.ask - beforeAverageMiddle)
+		const nowAverageMiddle = beforeAverageMiddle + (2 / (middleTerm + 1)) * (ticker.last - beforeAverageMiddle)
 		console.log('nowAverageMiddle : ' + nowAverageMiddle)
 		beforeAverageMiddle = nowAverageMiddle
 
 		//短期指数平滑移動平均
-		const nowAverageShort = beforeAverageShort + (2 / (shortTerm + 1)) * (ticker.ask - beforeAverageShort)
+		const nowAverageShort = beforeAverageShort + (2 / (shortTerm + 1)) * (ticker.last - beforeAverageShort)
 		console.log('nowAverageShort  : ' + nowAverageShort)
 		beforeAverageShort = nowAverageShort
+
+
+        /* ポジションの評価損益を取得 */
+        let pnl = await bitflyer.privateGetGetcollateral()
+        console.log(pnl)
+
 
 		/* 注文実施 */
 		if(position == 'SQUARE') {
 		    //ニュートラルの場合
 			if(nowAverageMiddle < nowAverageShort) {
 				if (env.production) {
-					order = await bitflyer.createLimitBuyOrder("FX_BTC_JPY",　orderSize, ticker.ask - New);
+					order = await bitflyer.createLimitBuyOrder("FX_BTC_JPY",　orderSize, ticker.last);
 				} else {
 					order = "hoge";
 				}
 			}
 			else {
 				if (env.production) {
-					order = await bitflyer.createLimitSellOrder("FX_BTC_JPY", orderSize, ticker.ask + New);
+					order = await bitflyer.createLimitSellOrder("FX_BTC_JPY", orderSize, ticker.last);
 				} else {
 					order = "hoge";
 				}
@@ -150,35 +154,55 @@ function CulcFirstDay(term) {
 			console.log('Square order : ', order)
 		}
 		else if(position == 'SELL') {
-			//売りポジションの場合
-			if(nowAverageMiddle < nowAverageShort) {
-				//ゴールデンクロス
-				if (env.production) {
-                    //ポジション解消
-                    order1 = await bitflyer.createLimitBuyOrder("FX_BTC_JPY",　orderSize, ticker.ask - Cancellation);
-                    //新規ポジション
-                    order2 = await bitflyer.createLimitBuyOrder("FX_BTC_JPY",　orderSize, ticker.ask - New);
-				} else {
-					order = "hoge";
-                }
-                console.log('Cancellation positioning order : ', order1)
-				console.log('Long positioning order : ', order2)
+			if(pnl > 0) {
+				//売りポジションの場合
+				if(nowAverageMiddle < nowAverageShort && beforeAverageMiddle > beforeAverageShort) {
+					//ゴールデンクロス
+					if (env.production) {
+						//ポジション解消
+						//新規ポジション
+						order = await bitflyer.createLimitBuyOrder("FX_BTC_JPY",　orderSize*2, ticker.last);
+					} else {
+						order = "hoge";
+					}
+					console.log('Cancellation & Long positioning order : ', order)
+				}
 			}
-		}
-		else if(position == 'BUY') {
-        	//買いポジションの場合
-			if(nowAverageShort < nowAverageMiddle) {
-				//ゴールデンクロス
+			else if(pnl < -100){
 				if (env.production) {
-                    //ポジション解消
-                    order1 = await bitflyer.createLimitSellOrder("FX_BTC_JPY",　orderSize, ticker.ask - Cancellation);
-                    //新規ポジション
-					order2 = await bitflyer.createLimitSellOrder("FX_BTC_JPY",　orderSize, ticker.ask + New);
+					//ポジション解消
+					//新規ポジション
+					order = await bitflyer.createLimitBuyOrder("FX_BTC_JPY",　orderSize*2, ticker.last);
 				} else {
 					order = "hoge";
 				}
-                console.log('Cancellation positioning order : ', order1)
-				console.log('Short positioning order : ', order2)
+				console.log('Loss cut order : ', order)
+			}
+		}
+		else if(position == 'BUY') {
+			if(pnl > 0) {
+				//買いポジションの場合
+				if(nowAverageShort < nowAverageMiddle && beforeAverageShort > beforeAverageMiddle) {
+					//デッドクロス
+					if (env.production) {
+						//ポジション解消
+						//新規ポジション
+						order = await bitflyer.createLimitSellOrder("FX_BTC_JPY",　orderSize*2, ticker.last);
+					} else {
+						order = "hoge";
+					}
+					console.log('Cancellation & Short positioning order : ', order)
+				}
+			}
+			else if(pnl < -100){
+				if (env.production) {
+					//ポジション解消
+					//新規ポジション
+					order = await bitflyer.createLimitSellOrder("FX_BTC_JPY",　orderSize*2, ticker.last);
+				} else {
+					order = "hoge";
+				}
+				console.log('Loss cut order : ', order)
 			}
 		}
         await sleep(interval)

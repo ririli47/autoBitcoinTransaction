@@ -121,12 +121,10 @@ function CulcFirstDay(term) {
 		//中期指数平滑移動平均
 		const nowAverageMiddle = beforeAverageMiddle + (2 / (middleTerm + 1)) * (ticker.last - beforeAverageMiddle)
 		console.log('nowAverageMiddle : ' + nowAverageMiddle)
-		beforeAverageMiddle = nowAverageMiddle
 
 		//短期指数平滑移動平均
 		const nowAverageShort = beforeAverageShort + (2 / (shortTerm + 1)) * (ticker.last - beforeAverageShort)
 		console.log('nowAverageShort  : ' + nowAverageShort)
-		beforeAverageShort = nowAverageShort
 
 
         /* ポジションの評価損益を取得 */
@@ -205,6 +203,11 @@ function CulcFirstDay(term) {
 				console.log('Loss cut order : ', order)
 			}
 		}
+
+		//今回のデータを前回分として保存
+		beforeAverageMiddle = nowAverageMiddle
+		beforeAverageShort = nowAverageShort
+
         await sleep(interval)
     }
 }) ()

@@ -5,7 +5,7 @@ const config = require ('./config')
 const env = require ('./env')
 
 
-const interval = 60000
+const interval = 10000
 const orderSize = 0.01
 const middleTerm = 10
 const shortTerm = 5
@@ -15,7 +15,6 @@ const New = 100
 
 let beforeAverageMiddle = 0
 let beforeAverageShort = 0
-
 
 const sleep = (timer) => {
     return new Promise((resolve, reject) => {
@@ -77,6 +76,7 @@ function CulcFirstDay(term) {
 	let firstTermFlg = true
 	let position = 'SQUARE'
 	let order = null
+	let times = 0
 
     while (true) {
 		//現在時刻
@@ -109,14 +109,15 @@ function CulcFirstDay(term) {
 		if (firstTermFlg) {
 			beforeAverageMiddle = await CulcFirstDay(middleTerm)
 			beforeAverageShort  = await CulcFirstDay(shortTerm)
-			console.log('beforeAverageMiddle : ' + beforeAverageMiddle)
-			console.log('beforeAverageShort  : ' + beforeAverageShort )
 			firstTermFlg = false
 		}
 
 		/* 現時点の指数平滑移動平均を求める */
         const ticker = await bitflyer.fetchTicker("FX_BTC_JPY")
 		console.log("last : " + ticker.last)
+
+		console.log('beforeAverageMiddle : ' + beforeAverageMiddle)
+		console.log('beforeAverageShort  : ' + beforeAverageShort )
 
 		//中期指数平滑移動平均
 		const nowAverageMiddle = beforeAverageMiddle + (2 / (middleTerm + 1)) * (ticker.last - beforeAverageMiddle)
@@ -170,7 +171,7 @@ function CulcFirstDay(term) {
 				if (env.production) {
 					//ポジション解消
 					//新規ポジション
-					order = await bitflyer.createLimitBuyOrder("FX_BTC_JPY",　orderSize*2, ticker.last);
+					order = await bitflyer.createLimitBuyOrder("FX_BTC_JPY",　orderSize, ticker.last);
 				} else {
 					order = "hoge";
 				}
@@ -196,7 +197,7 @@ function CulcFirstDay(term) {
 				if (env.production) {
 					//ポジション解消
 					//新規ポジション
-					order = await bitflyer.createLimitSellOrder("FX_BTC_JPY",　orderSize*2, ticker.last);
+					order = await bitflyer.createLimitSellOrder("FX_BTC_JPY",　orderSize, ticker.last);
 				} else {
 					order = "hoge";
 				}
@@ -204,9 +205,14 @@ function CulcFirstDay(term) {
 			}
 		}
 
+		times++
+
 		//今回のデータを前回分として保存
-		beforeAverageMiddle = nowAverageMiddle
-		beforeAverageShort = nowAverageShort
+		if(times % 6 == 0) {
+			beforeAverageMiddle = nowAverageMiddle
+			beforeAverageShort = nowAverageShort
+			console.log('six times')
+		}
 
         await sleep(interval)
     }

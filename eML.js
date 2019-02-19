@@ -6,7 +6,7 @@ const env = require ('./env')
 
 
 const interval = 10000
-const orderSize = 0.01
+const orderSize = 0.02
 const middleTerm = 10
 const shortTerm = 5
 

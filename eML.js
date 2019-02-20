@@ -136,14 +136,14 @@ function CulcFirstDay(term) {
 		/* 注文実施 */
 		if(position == 'SQUARE') {
 		    //ニュートラルの場合
-			if(nowAverageMiddle < nowAverageShort) {
+			if(nowAverageMiddle < nowAverageShort && beforeAverageMiddle > beforeAverageShort) {
 				if (env.production) {
 					order = await bitflyer.createLimitBuyOrder("FX_BTC_JPY",　orderSize, ticker.last);
 				} else {
 					order = "hoge";
 				}
 			}
-			else {
+			else if(nowAverageShort < nowAverageMiddle && beforeAverageShort > beforeAverageMiddle){
 				if (env.production) {
 					order = await bitflyer.createLimitSellOrder("FX_BTC_JPY", orderSize, ticker.last);
 				} else {
@@ -155,7 +155,7 @@ function CulcFirstDay(term) {
 		else if(position == 'SELL') {
 			if(pnl.open_position_pnl > 0) {
 				//売りポジションの場合
-				if(nowAverageMiddle < nowAverageShort && beforeAverageMiddle > beforeAverageShort) {
+				if(nowAverageMiddle+5 < nowAverageShort-5 && beforeAverageMiddle > beforeAverageShort) {
 					//ゴールデンクロス
 					if (env.production) {
 						//ポジション解消
@@ -181,7 +181,7 @@ function CulcFirstDay(term) {
 		else if(position == 'BUY') {
 			if(pnl.open_position_pnl > 0) {
 				//買いポジションの場合
-				if(nowAverageShort < nowAverageMiddle && beforeAverageShort > beforeAverageMiddle) {
+				if(nowAverageShort+5 < nowAverageMiddle-5 && beforeAverageShort > beforeAverageMiddle) {
 					//デッドクロス
 					if (env.production) {
 						//ポジション解消

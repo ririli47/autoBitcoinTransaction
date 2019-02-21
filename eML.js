@@ -10,7 +10,7 @@ const orderSize = 0.02
 const middleTerm = 10
 const shortTerm = 5
 
-const Cancellation = 50
+const Cancellation = -10
 const New = 100
 
 let beforeAverageMiddle = 0
@@ -136,14 +136,14 @@ function CulcFirstDay(term) {
 		/* 注文実施 */
 		if(position == 'SQUARE') {
 		    //ニュートラルの場合
-			if(nowAverageMiddle < nowAverageShort && beforeAverageMiddle > beforeAverageShort) {
+			if(nowAverageMiddle < nowAverageShort) {
 				if (env.production) {
 					order = await bitflyer.createLimitBuyOrder("FX_BTC_JPY",　orderSize, ticker.last);
 				} else {
 					order = "hoge";
 				}
 			}
-			else if(nowAverageShort < nowAverageMiddle && beforeAverageShort > beforeAverageMiddle){
+			else if(nowAverageShort < nowAverageMiddle){
 				if (env.production) {
 					order = await bitflyer.createLimitSellOrder("FX_BTC_JPY", orderSize, ticker.last);
 				} else {
@@ -167,7 +167,7 @@ function CulcFirstDay(term) {
 					console.log('Cancellation & Long positioning order : ', order)
 				}
 			}
-			else if(pnl.open_position_pnl < -30){
+			else if(pnl.open_position_pnl < Cancellation){
 				if (env.production) {
 					//ポジション解消
 					//新規ポジション
@@ -193,7 +193,7 @@ function CulcFirstDay(term) {
 					console.log('Cancellation & Short positioning order : ', order)
 				}
 			}
-			else if(pnl.open_position_pnl < -30){
+			else if(pnl.open_position_pnl < Cancellation){
 				if (env.production) {
 					//ポジション解消
 					//新規ポジション

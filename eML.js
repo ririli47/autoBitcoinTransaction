@@ -155,7 +155,7 @@ function CulcFirstDay(term) {
 		else if(position == 'SELL') {
 			if(pnl.open_position_pnl > 0) {
 				//売りポジションの場合
-				if(nowAverageMiddle+5 < nowAverageShort-5 && beforeAverageMiddle > beforeAverageShort) {
+				if(nowAverageMiddle < nowAverageShort && beforeAverageMiddle > beforeAverageShort) {
 					//ゴールデンクロス
 					if (env.production) {
 						//ポジション解消
@@ -167,7 +167,7 @@ function CulcFirstDay(term) {
 					console.log('Cancellation & Long positioning order : ', order)
 				}
 			}
-			else if(pnl.open_position_pnl < -15){
+			else if(pnl.open_position_pnl < -30){
 				if (env.production) {
 					//ポジション解消
 					//新規ポジション
@@ -181,7 +181,7 @@ function CulcFirstDay(term) {
 		else if(position == 'BUY') {
 			if(pnl.open_position_pnl > 0) {
 				//買いポジションの場合
-				if(nowAverageShort+5 < nowAverageMiddle-5 && beforeAverageShort > beforeAverageMiddle) {
+				if(nowAverageShort < nowAverageMiddle && beforeAverageShort > beforeAverageMiddle) {
 					//デッドクロス
 					if (env.production) {
 						//ポジション解消
@@ -193,7 +193,7 @@ function CulcFirstDay(term) {
 					console.log('Cancellation & Short positioning order : ', order)
 				}
 			}
-			else if(pnl.open_position_pnl < -15){
+			else if(pnl.open_position_pnl < -30){
 				if (env.production) {
 					//ポジション解消
 					//新規ポジション

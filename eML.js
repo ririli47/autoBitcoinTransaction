@@ -6,7 +6,7 @@ const env = require ('./env')
 
 
 const interval = 10000
-const orderSize = 0.02
+const orderSize = 0.03
 const middleTerm = 10
 const shortTerm = 5
 
@@ -107,8 +107,8 @@ function CulcFirstDay(term) {
 
         /* 初回起動時のみ前日の指数平滑移動平均を求める */
 		if (firstTermFlg) {
-			beforeAverageMiddle = await CulcFirstDay(middleTerm)
-			beforeAverageShort  = await CulcFirstDay(shortTerm)
+			beforeAverageMiddle = await CulcFirstDay(middleTerm*2)
+			beforeAverageShort  = await CulcFirstDay(shortTerm*2)
 			firstTermFlg = false
 		}
 

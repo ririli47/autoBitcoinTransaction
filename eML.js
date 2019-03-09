@@ -77,7 +77,11 @@ function CulcFirstDay(term) {
 	let position = 'SQUARE'
 	let order = null
 	let times = 0
-
+	let resultPositions = 0
+	let resultOrders = 0
+	let ticker = null
+	let pnl = null
+	
     while (true) {
 		//現在時刻
 		let date = new Date()
@@ -85,7 +89,7 @@ function CulcFirstDay(term) {
 
 		/* 現在のポジション一覧を取得 */
 		try {
-			let resultPositions = await bitflyer.privateGetGetpositions({'product_code':'FX_BTC_JPY'})
+			resultPositions = await bitflyer.privateGetGetpositions({'product_code':'FX_BTC_JPY'})
 			console.log('Position list : ', resultPositions)
 		}
 		catch(error) {
@@ -103,7 +107,7 @@ function CulcFirstDay(term) {
 
 		/* 現在の注文状況を取得 */
 		try {
-			let resultOrders = await bitflyer.privateGetGetchildorders({'product_code':'FX_BTC_JPY', 'child_order_state':'ACTIVE'})
+			resultOrders = await bitflyer.privateGetGetchildorders({'product_code':'FX_BTC_JPY', 'child_order_state':'ACTIVE'})
 			console.log('Order list : ', resultOrders)
 		}
 		catch(error) {
@@ -114,6 +118,7 @@ function CulcFirstDay(term) {
 		if(resultOrders.length != 0) {
 			try{
 				let result = await bitflyer.privatePostCancelallchildorders ({"product_code": "FX_BTC_JPY"})
+				console.log('Canncell Order : ', result)
 			}
 			catch(error) {
 				console.log('CanclelChildOrders Error : ', error)
@@ -129,7 +134,7 @@ function CulcFirstDay(term) {
 
 		/* 現時点の指数平滑移動平均を求める */
 		try {
-			const ticker = await bitflyer.fetchTicker("FX_BTC_JPY")
+			ticker = await bitflyer.fetchTicker("FX_BTC_JPY")
 			console.log("last : " + ticker.last)
 		}
 		catch(error) {
@@ -150,7 +155,7 @@ function CulcFirstDay(term) {
 
         /* ポジションの評価損益を取得 */
 		try {
-			let pnl = await bitflyer.privateGetGetcollateral()
+			pnl = await bitflyer.privateGetGetcollateral()
 			console.log(pnl)
 		}
 		catch(error) {

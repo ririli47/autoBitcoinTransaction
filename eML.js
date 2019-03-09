@@ -232,7 +232,7 @@ function CulcFirstDay(term) {
 						//ポジション解消
 						//新規ポジション
 						try{
-							order = await bitflyer.createLimitSellOrder("FX_BTC_JPY", orderSize:2, ticker.last);
+							order = await bitflyer.createLimitSellOrder("FX_BTC_JPY", orderSize*2, ticker.last);
 						}
 						catch(error) {
 							console.log('CreateLimitBuyOrder Error : ', error)
@@ -247,7 +247,7 @@ function CulcFirstDay(term) {
 				if (env.production) {
 					//ポジション解消
 					try {
-						order = await bitflyer.createLimitSellOrder("FX_BTC_JPY",　orderSize*2, ticker.last);
+						order = await bitflyer.createLimitSellOrder("FX_BTC_JPY",　orderSize, ticker.last);
 					}
 					catch(error) {
 						console.log('CreateLimitBuyOrder Error : ', error)

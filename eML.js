@@ -81,49 +81,12 @@ function CulcFirstDay(term) {
 	let resultOrders = 0
 	let ticker = null
 	let pnl = null
-	
+
     while (true) {
 		//現在時刻
 		let date = new Date()
 		console.log("\n" + "time: " + date)
 
-		/* 現在のポジション一覧を取得 */
-		try {
-			resultPositions = await bitflyer.privateGetGetpositions({'product_code':'FX_BTC_JPY'})
-			console.log('Position list : ', resultPositions)
-		}
-		catch(error) {
-			console.log('GetPositions Error : ', error)
-		}
-
-		//ポジションがあったらステータスを変更
-		if(resultPositions.length != 0) {
-			position = resultPositions[0]['side']
-		}
-		else {
-			position = 'SQUARE'
-		}
-		console.log('Now Position : ', position)
-
-		/* 現在の注文状況を取得 */
-		try {
-			resultOrders = await bitflyer.privateGetGetchildorders({'product_code':'FX_BTC_JPY', 'child_order_state':'ACTIVE'})
-			console.log('Order list : ', resultOrders)
-		}
-		catch(error) {
-			console.log('GetChildOrders Error : ', error)
-		}
-        
-		//必要であればキャンセル
-		if(resultOrders.length != 0) {
-			try{
-				let result = await bitflyer.privatePostCancelallchildorders ({"product_code": "FX_BTC_JPY"})
-				console.log('Canncell Order : ', result)
-			}
-			catch(error) {
-				console.log('CanclelChildOrders Error : ', error)
-			}
-		}
 
         /* 初回起動時のみ前日の指数平滑移動平均を求める */
 		if (firstTermFlg) {
@@ -151,6 +114,55 @@ function CulcFirstDay(term) {
 		//短期指数平滑移動平均
 		const nowAverageShort = beforeAverageShort + (2 / (shortTerm + 1)) * (ticker.last - beforeAverageShort)
 		console.log('nowAverageShort  : ' + nowAverageShort)
+
+
+
+		/* 現在のポジション一覧を取得 */
+		try {
+			resultPositions = await bitflyer.privateGetGetpositions({'product_code':'FX_BTC_JPY'})
+			console.log('Position list : ', resultPositions)
+		}
+		catch(error) {
+			console.log('GetPositions Error : ', error)
+		}
+
+		//ポジションがあったらステータスを変更
+		if(resultPositions.length != 0) {
+			position = resultPositions[0]['side']
+			let size = resultPositions[0]['size']
+
+			//所持Bitcoin数が半端になっていた場合は補正する
+			if(size != orderSize && size > 0) {
+				order = await bitflyer.createLimitSellOrder("FX_BTC_JPY", orderSize + size, ticker.last);
+			}
+			else if (size != orderSize && size < 0) {
+				order = await bitflyer.createLimitBuyOrder("FX_BTC_JPY", orderSize + size, ticker.last);
+			}
+		}
+		else {
+			position = 'SQUARE'
+		}
+		console.log('Now Position : ', position)
+
+		/* 現在の注文状況を取得 */
+		try {
+			resultOrders = await bitflyer.privateGetGetchildorders({'product_code':'FX_BTC_JPY', 'child_order_state':'ACTIVE'})
+			console.log('Order list : ', resultOrders)
+		}
+		catch(error) {
+			console.log('GetChildOrders Error : ', error)
+		}
+        
+		//必要であればキャンセル
+		if(resultOrders.length != 0) {
+			try{
+				let result = await bitflyer.privatePostCancelallchildorders ({"product_code": "FX_BTC_JPY"})
+				console.log('Canncell Order : ', result)
+			}
+			catch(error) {
+				console.log('CanclelChildOrders Error : ', error)
+			}
+		}
 
 
         /* ポジションの評価損益を取得 */

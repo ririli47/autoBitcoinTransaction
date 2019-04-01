@@ -81,7 +81,8 @@ function culcStandardDeviation(term) {
 	request(options)
 		.then(function(body) {
             let results = JSON.parse(body)
-            const under = (term * (term - 1))
+            // const under = (term * (term - 1))
+            const under = term
 
             //記述量削減のため
             let result = results.result["60"]
@@ -100,6 +101,7 @@ function culcStandardDeviation(term) {
 
             //合計の2乗
             simpleSum2Power = simpleSum * simpleSum
+            console.log(simpleSum2Power)
 
             //標準偏差を計算
             let beforeRoot = (((term * sum2Power) - simpleSum2Power) / (under))

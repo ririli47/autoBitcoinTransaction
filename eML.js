@@ -129,13 +129,19 @@ function CulcFirstDay(term) {
 		//ポジションがあったらステータスを変更
 		if(resultPositions.length != 0) {
 			position = resultPositions[0]['side']
-			let size = resultPositions[0]['size']
+
+			let size = 0
+			for(let i = 0; i < resultPositions.length; i++) {
+				size += resultPositions[i]['size']
+			}
 			
+			console.log('Position size : ', size)
+
 			//所持Bitcoin数が半端になっていた場合は補正する
 			if(size != orderSize && position == 'BUY') {
 				if (env.production) {
 					try {
-							order = await bitflyer.createLimitSellOrder("FX_BTC_JPY", orderSize + size, ticker.last);
+						order = await bitflyer.createLimitSellOrder("FX_BTC_JPY", orderSize + size, ticker.last);
 					}
 					catch(error) {
 						console.log('CreateLimitSellOrder Error : ', error)
@@ -149,7 +155,7 @@ function CulcFirstDay(term) {
 			else if (size != orderSize && position == 'SELL') {
 				if (env.production) {
 					try {
-							order = await bitflyer.createLimitBuyOrder("FX_BTC_JPY", orderSize + size, ticker.last);
+						order = await bitflyer.createLimitBuyOrder("FX_BTC_JPY", orderSize + size, ticker.last);
 					}
 					catch(error) {
 						console.log('CreateLimitBuyOrder Error : ', error)

@@ -130,13 +130,35 @@ function CulcFirstDay(term) {
 		if(resultPositions.length != 0) {
 			position = resultPositions[0]['side']
 			let size = resultPositions[0]['size']
-
+			
 			//所持Bitcoin数が半端になっていた場合は補正する
 			if(size != orderSize && position == 'BUY') {
-				order = await bitflyer.createLimitSellOrder("FX_BTC_JPY", orderSize + size, ticker.last);
+				if (env.production) {
+					try {
+							order = await bitflyer.createLimitSellOrder("FX_BTC_JPY", orderSize + size, ticker.last);
+					}
+					catch(error) {
+						console.log('CreateLimitSellOrder Error : ', error)
+					}
+				}
+				else {
+					order = 'hoge sell order for recovery : ' +  (orderSize + size);
+				}
+				console.log('Recovering order : ', order)
 			}
 			else if (size != orderSize && position == 'SELL') {
-				order = await bitflyer.createLimitBuyOrder("FX_BTC_JPY", orderSize + size, ticker.last);
+				if (env.production) {
+					try {
+							order = await bitflyer.createLimitBuyOrder("FX_BTC_JPY", orderSize + size, ticker.last);
+					}
+					catch(error) {
+						console.log('CreateLimitBuyOrder Error : ', error)
+					}
+				}
+				else {
+					order = 'hoge buy order for recovery :' +  (orderSize + size)
+				}
+				console.log('Recovering order : ', order)
 			}
 		}
 		else {

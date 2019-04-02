@@ -26,12 +26,12 @@ const sleep = (timer) => {
     while (true) {
         const ticker = await bitflyer.fetchTicker ('FX_BTC_JPY')
 
-		// let result = await bitflyer.privateGetGetchildorders({'product_code':'FX_BTC_JPY', 'child_order_state':'ACTIVE'});
-		let resultPositions = await bitflyer.privateGetGetpositions({'product_code':'FX_BTC_JPY'});
+	// let result = await bitflyer.privateGetGetchildorders({'product_code':'FX_BTC_JPY', 'child_order_state':'ACTIVE'});
+	let resultPositions = await bitflyer.privateGetGetpositions({'product_code':'FX_BTC_JPY'});
         console.log('Position list : ', resultPositions)
         // JSON.parse(resultPositions)
         // console.log(JSON.parse(resultPositions))
-		console.log('Position list : ', resultPositions[0]['side'])
+	console.log('Position list : ', resultPositions[0]['side'])
 
 
         await sleep(interval)

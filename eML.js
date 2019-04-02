@@ -132,10 +132,10 @@ function CulcFirstDay(term) {
 			let size = resultPositions[0]['size']
 
 			//所持Bitcoin数が半端になっていた場合は補正する
-			if(size != orderSize && size > 0) {
+			if(size != orderSize && position == 'BUY') {
 				order = await bitflyer.createLimitSellOrder("FX_BTC_JPY", orderSize + size, ticker.last);
 			}
-			else if (size != orderSize && size < 0) {
+			else if (size != orderSize && position == 'SELL') {
 				order = await bitflyer.createLimitBuyOrder("FX_BTC_JPY", orderSize + size, ticker.last);
 			}
 		}
